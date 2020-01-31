@@ -1,0 +1,43 @@
+- name: clean yum repos path
+  file:
+    state: absent
+    path: /etc/yum.repos.d/
+
+- name: create yum repos path
+  file:
+    state: directory
+    path: /etc/yum.repos.d/
+
+- name: copy repo file
+  copy:
+    src: files/CentOS-Base.repo
+    dest: /etc/yum.repos.d/CentOS-Base.repo
+    owner: root
+    group: root
+    mode: '0755' 
+
+- name: update all
+  yum:
+    name: '*'
+    state: latest
+  register: update
+
+- name: install packages
+  yum:
+    name: "{{ packages }}"
+    state: latest
+ 
+- name: reboot if updates
+  command: '/sbin/reboot'
+  when: update.changed
+
+- name: Put SELinux in permissive mode, logging actions that would be blocked.
+  selinux:
+    policy: targeted
+    state: permissive
+
+- name: stop and disable firewalld
+  systemd:
+    name: firewalld
+    state: stopped
+    enabled: no

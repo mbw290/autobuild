@@ -1,0 +1,15 @@
+- name: install docker
+  yum:
+    name: docker
+    state: latest
+
+- name: start and enable docker
+  systemd:
+    name: docker
+    state: started
+    enabled: yes
+
+- name: copy my file
+  copy:
+    src: files/myfile.txt
+    dest: /tmp/myfile
